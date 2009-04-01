@@ -150,14 +150,13 @@ module Jekyll
       end 
     end
     
-    # Number of tests for file and directory types
+    # A number of tests for file and directory types for filtering
     def backup?(f) ; f[-1].chr == '~' ; end
     def hidden?(f) ; ['.', '_'].include?(f[0].chr) ; end
     def dest_dir?(f) ; self.dest.sub(/\/$/, '') == f ; end
     def posts_dir?(f) ; File.basename(f) == '_posts' ; end
     def layouts_dir?(f) ; File.basename(f) == '_layouts'; end
     def special?(f) ; posts_dir?(f) || layouts_dir?(f) ; end
-
 
     # Read all the files in <source>/_layouts into memory for later use.
     #
@@ -175,44 +174,13 @@ module Jekyll
       # ignore missing layout dir
     end
 
-    # # Read all the files in <base>/_posts and create a new Post object with each one.
-    # #
-    # # Returns nothing
-    # def read_posts(dir)
-    #   base = File.join(self.source, dir, '_posts')
-    #   entries = []
-    #   Dir.chdir(base) { entries = filter_entries(Dir['**/*']) }
-    # 
-    #   # first pass processes, but does not yet render post content
-    #   entries.each do |f|
-    #     if Post.valid?(f)
-    #       post = Post.new(self, self.source, dir, f)
-    # 
-    #       if post.published
-    #         self.posts << post
-    #         post.categories.each { |c| self.categories[c] << post }
-    #       end
-    #     end
-    #   end
-    # 
-    #   # second pass renders each post now that full site payload is available
-    #   self.posts.each do |post|
-    #     post.render(self.layouts, site_payload)
-    #   end
-    # 
-    #   self.posts.sort!
-    #   self.categories.values.map { |cats| cats.sort! { |a, b| b <=> a} }
-    # rescue Errno::ENOENT => e
-    #   # ignore missing layout dir
-    # end
-
     # Write each post to <dest>/<year>/<month>/<day>/<slug>
     #
     # Returns nothing
     def write_posts
       self.posts.each do |post|
         post.render(self.layouts, site_payload)
-        post.write(self.dest)
+        post.write
       end
     end
 
@@ -248,51 +216,6 @@ module Jekyll
       return dir, name
     end
 
-    # 
-    # # Copy all regular files from <source> to <dest>/ ignoring
-    # # any files/directories that are hidden or backup files (start
-    # # with "." or "#" or end with "~") or contain site content (start with "_")
-    # # unless they are "_posts" directories or web server files such as
-    # # '.htaccess'
-    # #   The +dir+ String is a relative path used to call this method
-    # #            recursively as it descends through directories
-    # #
-    # # Returns nothing
-    # def transform_pages(dir = '')
-    #   base = File.join(self.source, dir)
-    #   entries = filter_entries(Dir.entries(base))
-    #   directories = entries.select { |e| File.directory?(File.join(base, e)) }
-    #   files = entries.reject { |e| File.directory?(File.join(base, e)) }
-    # 
-    #   # we need to make sure to process _posts *first* otherwise they
-    #   # might not be available yet to other templates as {{ site.posts }}
-    #   if directories.include?('_posts')
-    #     directories.delete('_posts')
-    #     read_posts(dir)
-    #   end
-    #   [directories, files].each do |entries|
-    #     entries.each do |f|
-    #       if File.directory?(File.join(base, f))
-    #         next if self.dest.sub(/\/$/, '') == File.join(base, f)
-    #         transform_pages(File.join(dir, f))
-    #       else
-    #         first3 = File.open(File.join(self.source, dir, f)) { |fd| fd.read(3) }
-    # 
-    #         if first3 == "---"
-    #           # file appears to have a YAML header so process it as a page
-    #           page = Page.new(self, self.source, dir, f)
-    #           page.render(self.layouts, site_payload)
-    #           page.write(self.dest)
-    #         else
-    #           # otherwise copy the file without transforming it
-    #           FileUtils.mkdir_p(File.join(self.dest, dir))
-    #           FileUtils.cp(File.join(self.source, dir, f), File.join(self.dest, dir, f))
-    #         end
-    #       end
-    #     end
-    #   end
-    # end
-
     # Constructs a hash map of Posts indexed by the specified Post attribute
     #
     # Returns {post_attr => [<Post>]}
@@ -319,19 +242,5 @@ module Jekyll
         "topics" => post_attr_hash('topics')
       }}
     end
-
-    # # Filter out any files/directories that are hidden or backup files (start
-    # # with "." or "#" or end with "~") or contain site content (start with "_")
-    # # unless they are "_posts" directories or web server files such as
-    # # '.htaccess'
-    # def filter_entries(entries)
-    #   entries = entries.reject do |e|
-    #     unless ['_posts', '.htaccess'].include?(e)
-    #       # Reject backup/hidden
-    #       ['.', '_', '#'].include?(e[0..0]) or e[-1..-1] == '~'
-    #     end
-    #   end
-    # end
-
   end
 end

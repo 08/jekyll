@@ -11,8 +11,7 @@ module Jekyll
     end
 
     # Read the YAML frontmatter
-    #   +base+ is the String path to the dir containing the file
-    #   +name+ is the String filename of the file
+    #   +file+ is the file to parse
     #
     # Returns nothing
     def read_yaml(file)
@@ -25,16 +24,6 @@ module Jekyll
       end
     end
     
-    # def read_yaml(base, name)
-    #   self.content = File.read(File.join(base, name))
-    # 
-    #   if self.content =~ /^(---\s*\n.*?)\n---\s*\n/m
-    #     self.content = self.content[($1.size + 5)..-1]
-    # 
-    #     self.data = YAML.load($1)
-    #   end
-    # end
-
     # Transform the contents based on the file extension.
     #
     # Returns nothing

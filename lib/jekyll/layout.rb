@@ -21,17 +21,6 @@ module Jekyll
       self.read_yaml(file)
     end
     
-    # def initialize(site, base, name)
-    #   @site = site
-    #   @base = base
-    #   @name = name
-    # 
-    #   self.data = {}
-    # 
-    #   self.process(name)
-    #   self.read_yaml(base, name)
-    # end
-
     # Extract information from the layout filename
     #   +name+ is the String filename of the layout file
     #
