@@ -93,13 +93,13 @@ module Jekyll
       print "#{self.pages.size} pages, "
       print "#{self.files.size} files, and "
       print "#{self.layouts.keys.size} layouts\n"
-      
-      print "Transforming pages..."
+
+      print "Rendering posts..."
+      self.write_posts      
+      print "done!\nTransforming pages..."
       self.transform_pages
       print "done!\nCopying files..."
       self.copy_files
-      print "done!\nRendering posts..."
-      self.write_posts
       print "done!\n"
     end
 
