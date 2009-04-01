@@ -29,18 +29,17 @@ module Jekyll
     #   +categories+ is an Array of Strings for the categories for this post
     #
     # Returns <Post>
-    def initialize(site, source, dir, name)
+    def initialize(site, file)
       @site = site
-      @base = File.join(source, dir, '_posts')
-      @name = name
-
-      self.categories = dir.split('/').reject { |x| x.empty? }
+      dir, name = @site.relativize(file)
+            
+      self.categories = dir.split('/').reject { |x| x.empty? || x == '_posts' }
 
       parts = name.split('/')
       self.topics = parts.size > 1 ? parts[0..-2] : []
 
       self.process(name)
-      self.read_yaml(@base, name)
+      self.read_yaml(file)
 
       if self.data.has_key?('published') && self.data['published'] == false
         self.published = false
@@ -62,6 +61,40 @@ module Jekyll
         end
       end
     end
+    
+    # def initialize(site, source, dir, name)
+    #   @site = site
+    #   @base = File.join(source, dir, '_posts')
+    #   @name = name
+    # 
+    #   self.categories = dir.split('/').reject { |x| x.empty? }
+    # 
+    #   parts = name.split('/')
+    #   self.topics = parts.size > 1 ? parts[0..-2] : []
+    # 
+    #   self.process(name)
+    #   self.read_yaml(@base, name)
+    # 
+    #   if self.data.has_key?('published') && self.data['published'] == false
+    #     self.published = false
+    #   else
+    #     self.published = true
+    #   end
+    # 
+    #   if self.categories.empty?
+    #     if self.data.has_key?('category')
+    #       self.categories << self.data['category']
+    #     elsif self.data.has_key?('categories')
+    #       # Look for categories in the YAML-header, either specified as
+    #       # an array or a string.
+    #       if self.data['categories'].kind_of? String
+    #         self.categories = self.data['categories'].split
+    #       else
+    #         self.categories = self.data['categories']
+    #       end
+    #     end
+    #   end
+    # end
 
     # Spaceship is based on Post#date
     #

@@ -15,15 +15,25 @@ module Jekyll
     #   +name+ is the String filename of the file
     #
     # Returns nothing
-    def read_yaml(base, name)
-      self.content = File.read(File.join(base, name))
-
+    def read_yaml(file)
+      self.content = File.read(file)
+      
       if self.content =~ /^(---\s*\n.*?)\n---\s*\n/m
         self.content = self.content[($1.size + 5)..-1]
-
+        
         self.data = YAML.load($1)
       end
     end
+    
+    # def read_yaml(base, name)
+    #   self.content = File.read(File.join(base, name))
+    # 
+    #   if self.content =~ /^(---\s*\n.*?)\n---\s*\n/m
+    #     self.content = self.content[($1.size + 5)..-1]
+    # 
+    #     self.data = YAML.load($1)
+    #   end
+    # end
 
     # Transform the contents based on the file extension.
     #

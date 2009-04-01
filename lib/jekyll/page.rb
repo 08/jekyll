@@ -14,18 +14,29 @@ module Jekyll
     #   +name+ is the String filename of the file
     #
     # Returns <Page>
-    def initialize(site, base, dir, name)
+    def initialize(site, file)
       @site = site
-      @base = base
-      @dir = dir
-      @name = name
-
+      @file = file
+      dir, name = @site.relativize(@file)
+      
       self.data = {}
 
       self.process(name)
-      self.read_yaml(File.join(base, dir), name)
-      #self.transform
+      self.read_yaml(@file)
     end
+    
+    # def initialize(site, base, dir, name)
+    #   @site = site
+    #   @base = base
+    #   @dir = dir
+    #   @name = name
+    # 
+    #   self.data = {}
+    # 
+    #   self.process(name)
+    #   self.read_yaml(File.join(base, dir), name)
+    #   #self.transform
+    # end
 
     # Extract information from the page filename
     #   +name+ is the String filename of the page file
@@ -49,19 +60,33 @@ module Jekyll
     #   +dest+ is the String path to the destination dir
     #
     # Returns nothing
-    def write(dest)
-      FileUtils.mkdir_p(File.join(dest, @dir))
+    def write
+      dir, name = site.relativize(@file)
+      FileUtils.mkdir_p(File.join(site.dest, dir))
 
-      name = @name
-      if self.ext != ""
-        name = @name.split(".")[0..-2].join('.') + self.ext
+      unless self.ext == ''
+        name = name.split(".")[0..-2].join('.') + self.ext
       end
 
-      path = File.join(dest, @dir, name)
+      path = File.join(site.dest, dir, name)
       File.open(path, 'w') do |f|
         f.write(self.output)
       end
     end
+    
+    # def write(dest)
+    #   FileUtils.mkdir_p(File.join(dest, @dir))
+    # 
+    #   name = @name
+    #   if self.ext != ""
+    #     name = @name.split(".")[0..-2].join('.') + self.ext
+    #   end
+    # 
+    #   path = File.join(dest, @dir, name)
+    #   File.open(path, 'w') do |f|
+    #     f.write(self.output)
+    #   end
+    # end
   end
 
 end
