@@ -113,10 +113,14 @@ And if you don't want to be in the proto site root to run Jekyll:
 
 h2. Run Options
 
+h3. Autobuild
+
 There is an autobuild feature that will regenerate your site if any of the
 files change. The autobuild feature can be used on any of the invocations:
 
   $ jekyll --auto
+
+h3. Related Posts
 
 By default, the "related posts" functionality will produce crappy results.
 In order to get high quality results with a true LSI algorithm, you must
@@ -124,11 +128,15 @@ enable it (it may take some time to run if you have many posts):
 
   $ jekyll --lsi
 
+h3. Code Highlighting
+
 For static code highlighting, you can install Pygments (see below) and then
 use that to make your code blocks look pretty. To activate Pygments support
 during the conversion:
 
   $ jekyll --pygments
+
+h3. Markdown Processor
 
 By default, Jekyll uses "Maruku":http://maruku.rubyforge.org (pure Ruby) for
 Markdown support. If you'd like to use RDiscount (faster, but requires
@@ -136,7 +144,9 @@ compilation), you must install it (gem install rdiscount) and then you can
 have it used instead:
 
   $ jekyll --rdiscount
-  
+
+h3. Local Server
+
 When previewing complex sites locally, simply opening the site in a web 
 browser (using file://) can cause problems with links that are relative to
 the site root (e.g., "/stylesheets/style.css"). To get around this, Jekyll
@@ -145,16 +155,61 @@ Default port is 4000:
 
   $ jekyll --server [PORT]
 
+h3. Permalink Style
+
 By default, the permalink for each post begins with its date in 'YYYY/MM/DD'
-format. If you do not wish to have the date appear in the URL of each post, 
+format.
+
+If you do not wish to have the date appear in the URL of each post, 
 you can change the permalink style to 'none' so that only the 'slug' part of
 the filename is used. For example, with the permalink style set to 'none' the
 file '2009-01-01-happy-new-year.markdown' will have a permalink like
 'http://yoursite.com/happy-new-year.html'. The date of the post will still be
 read from the filename (and is required!) to be used elsewhere in Jekyll.
-Example usage:
 
-  $ jekyll --permalink none
+If you want WordPress-style pretty URLs that leave off the .html, you can
+change the permalink style to 'pretty' and directories corresponding to the
+date parts and post name will be made and an index.html will be placed in the
+leaf directory resulting in URLs like 2008/11/17/blogging-like-a-hacker/.
+
+  $ jekyll --permalink [date|none|pretty]
+
+h2. Configuration File
+
+All of the options listed above can be specified on a site-by-site basis in
+a '_config.yml' file at the root of the site's source. As the filename
+suggests, the configuration is given in "YAML":http://www.yaml.org/. As
+well as all of the options discussed in the last section, there are a few
+additional options:
+
+  destination: [PATH]           # Specify where the site should be rendered
+  markdown: [maruku|rdiscount]  # Which markdown renderer to use?
+
+  maruku:               # This is a YAML hash for Maruku settings
+    use_divs: [BOOLEAN] # Use the div element Maruku extension
+    use_tex:  [BOOLEAN] # Use the LaTeX extension to Maruku
+    png_dir:  [PATH]    # Where should the math PNGs be stored?
+    png_url:  [URL]     # A relative URL for the PNGs
+
+The default configuration is shown below as in YAML format: 
+
+  destination: ./_site
+  auto:        false
+  lsi:         false
+  server_port: 4000
+  pygments:    false
+  markdown:    maruku
+  permalink:   date
+
+  maruku:
+    use_tex:    false
+    use_divs:   false
+    png_dir:    images/latex
+    png_url:    /images/latex
+
+Parameters set in a configuration file override the default values. Parameters
+set using command line options override both the default values and those set
+in a configuration file.
 
 h2. Configuration File
 
@@ -292,6 +347,15 @@ h3. Predefined Post Variables
     /year/month/day/title.html then you can set this variable and it will
     be used as the final URL.
 
+  published
+    Set to false if you don't want a post to show up when the site is 
+    generated.
+
+  category/categories
+    Instead of placing posts inside of folders, you can specify one or more
+    categories that the post belongs to. When the site is generated the post
+    will act as though it had been set with these categories normally.
+
 h3. Custom Variables
 
 Any variables in the front matter that are not predefined are mixed into the
@@ -343,6 +407,12 @@ Convert an array into a sentence.
 becomes
 
   foo, bar, and baz
+  
+h3. Textilize
+
+Convert a Textile-formatted string into HTML, formatted via RedCloth
+
+  {{ page.excerpt | textilize }}
 
 h3. Include (Tag)
 
@@ -379,46 +449,43 @@ The argument to <code>highlight</code> is the language identifier. To find the
 appropriate identifier to use for your favorite language, look for the "short
 name" on the "Lexers":http://pygments.org/docs/lexers/ page.
 
+There is a second argument to <code>highlight</code> called
+<code>linenos</code> that is optional. Including the <code>linenos</code>
+argument will force the highlighted code to include line numbers. For
+instance, the following code block would include line numbers next to each
+line:
+
+<pre>
+{% highlight ruby linenos %}
+def foo
+  puts 'foo'
+end
+{% endhighlight %}
+</pre>
+
 In order for the highlighting to show up, you'll need to include a
 highlighting stylesheet. For an example stylesheet you can look at
 "syntax.css":http://github.com/mojombo/tpw/tree/master/css/syntax.css. These
 are the same styles as used by GitHub and you are free to use them for your
-own site.
+own site. If you use linenos, you might want to include an additional CSS
+class definition for <code>lineno</code> in syntax.css to distinguish the line
+numbers from the highlighted code.
 
 h2. Categories
 
-Posts are placed into categories based on the directory structure they are found
-within (see above for an example). The categories can be accessed from within
-a Liquid template as follows:
+Posts are placed into categories based on the directory structure they are
+found within (see above for an example). The categories can be accessed from
+within a Liquid template as follows:
 
 <pre>
 {% for post in site.categories.foo %}
-	<li><span>{{ post.date | date_to_string }}</span> - {{ post.title }}</li>
+  <li><span>{{ post.date | date_to_string }}</span> - {{ post.title }}</li>
 {% endfor %}
 </pre>
 
 This would list all the posts in the category 'foo' by date and title.
 
 The posts within each category are sorted in reverse chronological order.
-
-h2. Contribute
-
-If you'd like to hack on Jekyll, grab the source from GitHub. To get
-all of the dependencies, install the gem first.
-
-  $ git clone git://github.com/mojombo/jekyll
-
-The best way to get your changes merged back into core is as follows:
-
-# Fork mojombo/jekyll on GitHub
-# Clone down your fork
-# Create a topic branch to contain your change
-# Hack away
-# If you are adding new functionality, document it in README.textile
-# Do not change the version number, I will do that on my end
-# If necessary, rebase your commits into logical chunks, without errors
-# Push the branch up to GitHub
-# Send me (mojombo) a pull request for your branch
 
 h2. Blog migrations
 
@@ -456,6 +523,38 @@ it will attempt to pull all entries across all blogs that were published.
 This code also has only been tested with Typo version 4+. Previous versions
 of Typo may not convert correctly. Please check the results and verify the 
 posts before publishing.
+
+h3. TextPattern 4
+
+To migrate your TextPattern blog into Jekyll, you'll need read access to the MySQL
+database. The lib/jekyll/converters/textpattern.rb module provides a simple convert to create .textile files in a _posts directory based on 
+the entries contained therein.
+
+  $ ruby -r './lib/jekyll/converters/textpattern' -e 'Jekyll::TextPattern.process( \
+    "database_name", "username", "password", "hostname")'
+
+The hostname defaults to _localhost_, all other variables are needed
+You may need to adjust the code used to filter entries. Left alone,
+it will attempt to pull all entries that are live or sticky.
+
+h2. Contribute
+
+If you'd like to hack on Jekyll, start by forking my repo on GitHub:
+
+http://github.com/mojombo/jekyll
+
+To get all of the dependencies, install the gem first. The best way to get
+your changes merged back into core is as follows:
+
+# Clone down your fork
+# Create a topic branch to contain your change
+# Hack away
+# Add tests and make sure everything still passes by running `rake`
+# If you are adding new functionality, document it in README.textile
+# Do not change the version number, I will do that on my end
+# If necessary, rebase your commits into logical chunks, without errors
+# Push the branch up to GitHub
+# Send me (mojombo) a pull request for your branch
 
 h2. License
 

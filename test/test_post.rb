@@ -43,7 +43,15 @@ class TestPost < Test::Unit::TestCase
     p.process("2008-12-03-permalinked-post.textile")
     p.read_yaml(File.join(File.dirname(__FILE__), *%w[source _posts]), "2008-12-03-permalinked-post.textile")
 
-    assert_equal "my_category", p.dir
+    assert_equal "my_category/", p.dir
+  end
+  
+  def test_url_respects_permalink
+    p = Post.allocate
+    p.process("2008-12-03-permalinked-post.textile")
+    p.read_yaml(File.join(File.dirname(__FILE__), *%w[source _posts]), "2008-12-03-permalinked-post.textile")
+
+    assert_equal "my_category/permalinked-post", p.url
   end
 
   def test_read_yaml
@@ -61,6 +69,34 @@ class TestPost < Test::Unit::TestCase
     p.transform
     
     assert_equal "<h1>{{ page.title }}</h1>\n<p>Best <strong>post</strong> ever</p>", p.content
+  end
+
+  def test_published
+    p = Post.new(File.join(File.dirname(__FILE__), *%w[source]), '',  "2008-02-02-published.textile")
+		assert_equal true, p.published
+  end
+
+  def test_not_published
+    p = Post.new(File.join(File.dirname(__FILE__), *%w[source]), '',  "2008-02-02-not-published.textile")
+		assert_equal false, p.published
+  end
+
+  def test_yaml_category
+    p = Post.new(File.join(File.dirname(__FILE__), *%w[source]), '',  "2009-01-27-category.textile")
+    assert p.categories.include?('foo')
+  end
+
+  def test_yaml_categories
+    p1 = Post.new(File.join(File.dirname(__FILE__), *%w[source]), '',
+                  "2009-01-27-categories.textile")
+    p2 = Post.new(File.join(File.dirname(__FILE__), *%w[source]), '',
+                  "2009-01-27-array-categories.textile")
+    
+    [p1, p2].each do |p|
+      assert p.categories.include?('foo')
+      assert p.categories.include?('bar')
+      assert p.categories.include?('baz')
+    end
   end
   
   def test_render
@@ -88,8 +124,17 @@ class TestPost < Test::Unit::TestCase
     assert_equal "<<< <p>url: /2008/11/21/complex.html<br />\ndate: #{Time.parse("2008-11-21")}<br />\nid: /2008/11/21/complex</p> >>>", p.output
   end
   
+  def test_categories_and_topics
+    p = Post.new(File.join(File.dirname(__FILE__), *%w[source]), 'foo', 'bar/2008-12-12-topical-post.textile')
+    assert_equal ['foo'], p.categories
+    assert_equal ['bar'], p.topics
+  end    
+  
   def test_include
-    Jekyll.source = File.join(File.dirname(__FILE__), *%w[source])
+    config = Jekyll::DEFAULTS.clone
+    config['source'] = File.join(File.dirname(__FILE__), *%w[source])
+    Jekyll.configure(config)
+
     p = Post.new(File.join(File.dirname(__FILE__), *%w[source]), '', "2008-12-13-include.markdown")
     layouts = {"default" => Layout.new(File.join(File.dirname(__FILE__), *%w[source _layouts]), "simple.html")}
     p.render(layouts, {"site" => {"posts" => []}})

@@ -10,6 +10,10 @@ class TestFilters < Test::Unit::TestCase
     @filter = JekyllFilter.new
   end
 
+  def test_textilize_with_simple_string
+    assert_equal "<p>something <strong>really</strong> simple</p>", @filter.textilize("something *really* simple")
+  end
+
   def test_array_to_sentence_string_with_no_args
     assert_equal "", @filter.array_to_sentence_string([])
   end
@@ -27,6 +31,11 @@ class TestFilters < Test::Unit::TestCase
   def test_array_to_sentence_string_with_multiple_args
     assert_equal "1, 2, 3, and 4", @filter.array_to_sentence_string([1, 2, 3, 4])
     assert_equal "chunky, bacon, bits, and pieces", @filter.array_to_sentence_string(["chunky", "bacon", "bits", "pieces"])
+  end
+  
+  def test_xml_escape_with_ampersands
+    assert_equal "AT&amp;T", @filter.xml_escape("AT&T")
+    assert_equal "&lt;code&gt;command &amp;lt;filename&amp;gt;&lt;/code&gt;", @filter.xml_escape("<code>command &lt;filename&gt;</code>")
   end
   
 end

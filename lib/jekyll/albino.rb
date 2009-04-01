@@ -38,7 +38,7 @@
 #
 # To see all lexers and formatters available, run `pygmentize -L`.
 #
-# Chris Wanstrath // chris@ozmm.org 
+# Chris Wanstrath // chris@ozmm.org
 #         GitHub // http://github.com
 #
 require 'open4'
@@ -60,10 +60,14 @@ class Albino
   end
 
   def execute(command)
-    pid, stdin, stdout, stderr = Open4.popen4(command)
-    stdin.puts @target
-    stdin.close
-    stdout.read.strip
+    output = ''
+    Open4.popen4(command) do |pid, stdin, stdout, stderr|
+      stdin.puts @target
+      stdin.close
+      output = stdout.read.strip
+      [stdout, stderr].each { |io| io.close }
+    end
+    output
   end
 
   def colorize(options = {})
