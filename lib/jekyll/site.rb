@@ -17,13 +17,15 @@ module Jekyll
       self.pygments        = config['pygments']
       self.permalink_style = config['permalink'].to_sym
 
+      self.setup
+    end
+
+    def reset
       self.layouts         = {}
       self.posts           = []
       self.pages           = []
       self.files           = []
       self.categories      = Hash.new { |hash, key| hash[key] = Array.new }
-
-      self.setup
     end
 
     def setup
@@ -87,6 +89,8 @@ module Jekyll
     #
     # Returns nothing
     def process
+      self.reset
+      
       print "Scanning... "
       self.scan
       print "done: #{self.posts.size} posts, "
